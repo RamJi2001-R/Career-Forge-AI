@@ -1,0 +1,66 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-base text-ink font-sans antialiased;
+  }
+
+  ::selection {
+    @apply bg-accent/30 text-ink;
+  }
+
+  /* Keyboard focus ko hamesha visible rakhte hain, accessibility ke liye */
+  :focus-visible {
+    outline: 2px solid theme("colors.accent.DEFAULT");
+    outline-offset: 2px;
+  }
+}
+
+@layer components {
+  /* Reusable input style, taaki har form me class na dohrani pade */
+  .input-field {
+    @apply w-full bg-base-surface border border-base-border rounded-md px-4 py-3
+      text-ink placeholder:text-ink-faint
+      focus:border-accent focus:outline-none transition-colors;
+  }
+
+  .btn-primary {
+    @apply w-full bg-accent text-base font-medium rounded-md px-4 py-3
+      hover:bg-accent-soft transition-colors disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  /* Screenshot wala pink/purple glow effect.
+     Kisi bhi page ke sabse bahar wale div par "page-glow" class lagao. */
+  .page-glow {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .page-glow::before {
+    content: "";
+    position: fixed;
+    top: -5%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 900px;
+    height: 900px;
+    background: radial-gradient(circle, theme("colors.glow") 0%, transparent 65%);
+    opacity: 0.10;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* Glow ke andar jo bhi content ho, use glow ke upar dikhane ke liye */
+  .page-content {
+    position: relative;
+    z-index: 1;
+  }
+
+  /* Headline me jo word italic + accent color me highlight karna ho,
+     jaise screenshot me "Talk to your AI." tha */
+  .text-highlight {
+    @apply font-display italic text-accent-soft;
+  }
+}
