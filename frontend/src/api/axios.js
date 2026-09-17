@@ -3,7 +3,7 @@ import axios from "axios";
 // Ek hi axios instance poore app me use karenge,
 // taaki baseURL aur token attach karne ka logic ek hi jagah ho.
 const api = axios.create({
-  baseURL: "http://localhost:5000/api",
+  baseURL: import.meta.env.VITE_API_URL || "http://localhost:5000/api",
 });
 
 // Interceptor — har request jaane se PEHLE ye chalta hai.
