@@ -12,7 +12,7 @@ Turn your resume into your career advantage. Analyze it against any job descript
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=flat-square&logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
 [![Gemini API](https://img.shields.io/badge/Google-Gemini_AI-4285F4?style=flat-square&logo=google&logoColor=white)](https://ai.google.dev/)
 
-[Live Demo](#) · [Report Bug](#) · [Request Feature](#)
+[Live Demo](https://career-forge-ai-sage.vercel.app/) · [Report Bug](#) · [Request Feature](#)
 
 </div>
 
@@ -217,5 +217,5 @@ This project is licensed under the MIT License.
 
 ## Author
 
-Built by **[Your Name]**
-[Portfolio](#) · [LinkedIn](#) · [GitHub](#)
+Built by **Ram Ji**
+[Portfolio](https://my-portfolio-ten-gules-68.vercel.app/) · [LinkedIn](https://www.linkedin.com/in/ram-ji-bhardwaj-8a82a7329/) · [GitHub](https://github.com/RamJi2001-R)
