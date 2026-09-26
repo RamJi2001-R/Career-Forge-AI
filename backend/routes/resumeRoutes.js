@@ -6,6 +6,8 @@ import {
   getMyReports,
   getReportById,
   getSkillGapAnalysis,
+  getLearningRoadmap,
+  createLearningRoadmap,
   getInterviewPrep,
   getAtsOptimization,
   downloadAtsOptimizationPdf,
@@ -30,6 +32,8 @@ router.get("/profile-stats", protect, getProfileStats);
 router.get("/reports/:id", protect, getReportById);
 router.get("/reports/:id/pdf", protect, downloadFullReportPdf);
 router.get("/reports/:id/skill-gap", protect, getSkillGapAnalysis);
+router.get("/reports/:id/roadmap", protect, getLearningRoadmap);
+router.post("/reports/:id/roadmap", protect, createLearningRoadmap);
 router.get("/reports/:id/interview-prep", protect, getInterviewPrep);
 router.get("/reports/:id/ats-optimize", protect, getAtsOptimization);
 router.get("/reports/:id/ats-optimize/pdf", protect, downloadAtsOptimizationPdf);

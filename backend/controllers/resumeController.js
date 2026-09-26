@@ -4,6 +4,7 @@ import { extractTextFromResume } from "../services/resumeParserService.js";
 import {
   analyzeResumeWithAI,
   analyzeSkillGapsWithAI,
+  generateRoadmapWithAI,
   generateInterviewPrepWithAI,
   optimizeResumeWithAI,
 } from "../services/aiService.js";
@@ -122,6 +123,78 @@ export const getSkillGapAnalysis = async (req, res) => {
     console.error("Skill gap analysis error:", error.message);
     res.status(500).json({
       message: error.message || "Something went wrong while analyzing skill gaps",
+    });
+  }
+};
+
+export const getLearningRoadmap = async (req, res) => {
+  try {
+    const report = await AnalysisReport.findOne({
+      _id: req.params.id,
+      user: req.user._id,
+    }).select("roadmap");
+
+    if (!report) {
+      return res.status(404).json({ message: "Report not found" });
+    }
+
+    res.status(200).json({ roadmap: report.roadmap || null });
+  } catch (error) {
+    res.status(500).json({ message: "Could not load roadmap", error: error.message });
+  }
+};
+
+export const createLearningRoadmap = async (req, res) => {
+  try {
+    const durationDays = Number(req.body.durationDays);
+    if (![14, 30, 60].includes(durationDays)) {
+      return res.status(400).json({ message: "Choose a roadmap duration of 14, 30, or 60 days" });
+    }
+
+    const report = await AnalysisReport.findOne({
+      _id: req.params.id,
+      user: req.user._id,
+    }).populate("resume", "extractedText fileName");
+
+    if (!report) {
+      return res.status(404).json({ message: "Report not found" });
+    }
+
+    if (
+      report.roadmap?.durationDays === durationDays
+      && report.roadmap.days?.length === durationDays
+    ) {
+      return res.status(200).json({ roadmap: report.roadmap, cached: true });
+    }
+
+    if (!report.skillGapDetails?.length) {
+      const skillGapData = await analyzeSkillGapsWithAI(
+        report.resume.extractedText,
+        report.jobDescription
+      );
+      report.skillGapDetails = skillGapData.skillGapDetails;
+    }
+
+    const generated = await generateRoadmapWithAI(
+      report.resume.extractedText,
+      report.jobDescription,
+      report.skillGapDetails,
+      durationDays
+    );
+
+    report.roadmap = {
+      durationDays,
+      summary: generated.summary,
+      days: generated.days,
+      generatedAt: new Date(),
+    };
+    await report.save();
+
+    res.status(201).json({ roadmap: report.roadmap, cached: false });
+  } catch (error) {
+    console.error("Roadmap generation error:", error.message);
+    res.status(500).json({
+      message: error.message || "Something went wrong while generating the roadmap",
     });
   }
 };

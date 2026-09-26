@@ -8,6 +8,7 @@ import Dashboard from "./pages/Dashboard.jsx";
 import ResumeAnalyzer from "./pages/ResumeAnalyzer.jsx";
 import Report from "./pages/Report.jsx";
 import SkillGap from "./pages/SkillGap.jsx";
+import Roadmap from "./pages/Roadmap.jsx";
 import InterviewPrep from "./pages/InterviewPrep.jsx";
 import AtsOptimizer from "./pages/AtsOptimizer.jsx";
 import Profile from "./pages/Profile.jsx";
@@ -57,6 +58,15 @@ function App() {
             element={
               <ProtectedRoute>
                 <SkillGap />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/report/:id/roadmap"
+            element={
+              <ProtectedRoute>
+                <Roadmap />
               </ProtectedRoute>
             }
           />

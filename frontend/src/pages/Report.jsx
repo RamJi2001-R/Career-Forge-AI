@@ -140,6 +140,9 @@ const Report = () => {
             <Link to={`/report/${report._id}/skill-gap`} className="rounded-lg bg-accent px-4 py-2.5 text-sm font-medium text-base transition-colors hover:bg-accent-soft">
               Explore skill gaps
             </Link>
+            <Link to={`/report/${report._id}/roadmap`} className="rounded-lg border border-base-border px-4 py-2.5 text-sm text-ink transition-colors hover:border-accent">
+              Build learning roadmap
+            </Link>
             <Link to={`/report/${report._id}/interview-prep`} className="rounded-lg border border-base-border px-4 py-2.5 text-sm text-ink transition-colors hover:border-accent">
               Prepare for interview
             </Link>

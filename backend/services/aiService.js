@@ -9,6 +9,45 @@ if (!apiKey) {
 
 const genAI = new GoogleGenerativeAI(apiKey);
 const model = genAI.getGenerativeModel({ model: "gemini-3.6-flash" });
+const fallbackModelName = process.env.GEMINI_FALLBACK_MODEL?.trim();
+const fallbackModel = fallbackModelName
+  ? genAI.getGenerativeModel({ model: fallbackModelName })
+  : null;
+
+const isTransientGeminiError = (error) => {
+  const status = error.status || error.statusCode || error.response?.status;
+  const message = error.message?.toLowerCase() || "";
+  return [429, 500, 502, 503, 504].includes(status)
+    || /overloaded|high demand|temporarily unavailable|service unavailable|rate.?limit/.test(message);
+};
+
+const generateContentWithRetry = async (prompt) => {
+  const maxAttempts = 3;
+
+  for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
+    try {
+      return await model.generateContent(prompt);
+    } catch (error) {
+      if (!isTransientGeminiError(error) || attempt === maxAttempts) {
+        if (isTransientGeminiError(error)) {
+          if (fallbackModel) {
+            try {
+              return await fallbackModel.generateContent(prompt);
+            } catch (fallbackError) {
+              if (!isTransientGeminiError(fallbackError)) throw fallbackError;
+            }
+          }
+          throw new Error(
+            "Gemini is temporarily busy. Please wait a few seconds and try again."
+          );
+        }
+        throw error;
+      }
+
+      await new Promise((resolve) => setTimeout(resolve, attempt * 1000));
+    }
+  }
+};
 
 // Ye helper function Gemini ke response se JSON safely nikalta hai.
 // Kabhi kabhi AI response ke aage-peeche ```json jaisi cheezein
@@ -52,7 +91,7 @@ ${jobDescription}
   let result;
 
   try {
-    result = await model.generateContent(prompt);
+    result = await generateContentWithRetry(prompt);
   } catch (error) {
     if (error.message?.includes("API_KEY_INVALID")) {
       throw new Error(
@@ -114,7 +153,7 @@ ${jobDescription}
   let result;
 
   try {
-    result = await model.generateContent(prompt);
+    result = await generateContentWithRetry(prompt);
   } catch (error) {
     if (error.message?.includes("API_KEY_INVALID")) {
       throw new Error(
@@ -130,6 +169,92 @@ ${jobDescription}
     return parseJsonResponse(rawText);
   } catch (error) {
     throw new Error("AI returned an invalid response. Please try again.");
+  }
+};
+
+export const generateRoadmapWithAI = async (
+  resumeText,
+  jobDescription,
+  skillGaps,
+  durationDays
+) => {
+  const prompt = `
+You are a practical career coach. Build a personalized ${durationDays}-day learning roadmap
+to close the candidate's skill gaps for the target role.
+
+Return ONLY valid JSON in exactly this schema:
+{
+  "summary": string (2-3 concise sentences),
+  "days": [
+    {
+      "dayNumber": number (1 through ${durationDays}, each day exactly once),
+      "skill": string (the main skill focus for this day),
+      "priority": "High" | "Medium" | "Low",
+      "objective": string (a concrete learning outcome),
+      "tasks": string[] (2-4 actionable tasks for the day),
+      "estimatedHours": number (between 0.5 and 8),
+      "deliverable": string (something tangible to finish today),
+      "milestone": boolean (true for a meaningful checkpoint)
+    }
+  ]
+}
+
+Rules:
+- Include exactly ${durationDays} day entries, in dayNumber order, with no skipped days.
+- Schedule High priority gaps before Medium and Low gaps when prerequisites allow.
+- Respect real skill prerequisites; do not teach advanced work before its foundations.
+- Spread longer skills across multiple days and include practice, not only passive study.
+- Use the supplied skill gaps; do not invent unrelated requirements or claim specific course links.
+- Make the workload realistic for the stated daily hours.
+
+RESUME:
+"""
+${resumeText}
+"""
+
+JOB DESCRIPTION:
+"""
+${jobDescription}
+"""
+
+SKILL GAPS (already priority-ranked):
+${JSON.stringify(skillGaps)}
+`;
+
+  let result;
+  try {
+    result = await generateContentWithRetry(prompt);
+  } catch (error) {
+    if (error.message?.includes("API_KEY_INVALID")) {
+      throw new Error(
+        "Gemini API key is invalid. Create a new key in Google AI Studio and update backend/.env."
+      );
+    }
+    throw error;
+  }
+
+  try {
+    const roadmap = parseJsonResponse(result.response.text());
+    const validDays = Array.isArray(roadmap.days)
+      && roadmap.days.length === durationDays
+      && roadmap.days.every((day, index) =>
+        day.dayNumber === index + 1
+        && typeof day.skill === "string"
+        && ["High", "Medium", "Low"].includes(day.priority)
+        && typeof day.objective === "string"
+        && Array.isArray(day.tasks)
+        && typeof day.estimatedHours === "number"
+        && typeof day.deliverable === "string"
+        && typeof day.milestone === "boolean"
+      );
+
+    if (typeof roadmap.summary !== "string" || !validDays) {
+      throw new Error("Invalid roadmap shape");
+    }
+
+    return roadmap;
+  } catch (error) {
+    throw new Error("AI returned an invalid roadmap. Please try again.");
   }
 };
 
@@ -173,7 +298,7 @@ ${jobDescription}
   let result;
 
   try {
-    result = await model.generateContent(prompt);
+    result = await generateContentWithRetry(prompt);
   } catch (error) {
     if (error.message?.includes("API_KEY_INVALID")) {
       throw new Error(
@@ -236,7 +361,7 @@ ${jobDescription}
   let result;
 
   try {
-    result = await model.generateContent(prompt);
+    result = await generateContentWithRetry(prompt);
   } catch (error) {
     if (error.message?.includes("API_KEY_INVALID")) {
       throw new Error(

@@ -50,6 +50,27 @@ const analysisReportSchema = new mongoose.Schema(
       },
     ],
 
+    roadmap: {
+      durationDays: Number,
+      summary: String,
+      generatedAt: Date,
+      days: [
+        {
+          dayNumber: Number,
+          skill: String,
+          priority: {
+            type: String,
+            enum: ["High", "Medium", "Low"],
+          },
+          objective: String,
+          tasks: [String],
+          estimatedHours: Number,
+          deliverable: String,
+          milestone: Boolean,
+        },
+      ],
+    },
+
     // Phase 5: interview preparation questions, lazily generate hote hain
     // (jaise skillGapDetails), taaki dobara AI call na lagana pade.
     interviewPrep: [

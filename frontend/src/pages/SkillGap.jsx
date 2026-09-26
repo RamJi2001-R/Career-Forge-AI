@@ -78,6 +78,15 @@ const SkillGap = () => {
           Here's what's holding your resume back from this role, ranked by priority.
         </p>
 
+        <div className="mb-8">
+          <Link
+            to={`/report/${id}/roadmap`}
+            className="inline-flex rounded-lg bg-accent px-4 py-2.5 text-sm font-medium text-base transition-colors hover:bg-accent-soft"
+          >
+            Turn these gaps into a day-wise roadmap
+          </Link>
+        </div>
+
         {/* Current vs Required skills, agar mile ho */}
         {(data.currentSkills || data.requiredSkills) && (
           <div className="grid sm:grid-cols-2 gap-4 mb-8">
