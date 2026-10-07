@@ -207,6 +207,7 @@ All private routes require an `Authorization: Bearer <token>` header.
 - [x] Full report PDF export
 - [x] Profile page with career progress tracking
 - [x] Landing page
+- [x] Roadmap
 - [ ] Full resume rewrite/export as a polished PDF resume
 - [ ] Email notifications for analysis completion
 - [ ] Multi-resume comparison against a single job description
